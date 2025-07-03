@@ -1,6 +1,7 @@
 package com.example.Authservice.service;
 
 import com.example.Authservice.entities.UserInfo;
+import com.example.Authservice.eventProducer.UserInfoProducer;
 import com.example.Authservice.model.UserInfoDto;
 import com.example.Authservice.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -31,6 +32,9 @@ public class UserDetailsServiceImpl implements UserDetailsService
     @Autowired
     protected final PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private final UserInfoProducer userInfoProducer;
+
 
     private static final Logger log = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
@@ -52,15 +56,23 @@ public class UserDetailsServiceImpl implements UserDetailsService
         return userRepository.findByUsername(userInfoDto.getUsername());
     }
 
-    public Boolean signupUser(UserInfoDto userInfoDto){
-        //        ValidationUtil.validateUserAttributes(userInfoDto);
+    public Boolean signupUser(UserInfoDto userInfoDto) {
         userInfoDto.setPassword(passwordEncoder.encode(userInfoDto.getPassword()));
-        if(Objects.nonNull(checkIfUserAlreadyExist(userInfoDto))){
+        if (Objects.nonNull(checkIfUserAlreadyExist(userInfoDto))) {
             return false;
         }
+
         String userId = UUID.randomUUID().toString();
         userRepository.save(new UserInfo(userId, userInfoDto.getUsername(), userInfoDto.getPassword(), new HashSet<>()));
-        // pushEventToQueue
+
+        // Try Kafka but don't fail signup if Kafka is down
+        try {
+            userInfoProducer.sendEventToKafka(userInfoDto);
+        } catch (Exception e) {
+            log.warn("Kafka unavailable. Continuing without sending user event. Reason: {}", e.getMessage());
+        }
+
         return true;
     }
+
 }
