@@ -63,7 +63,9 @@ public class UserDetailsServiceImpl implements UserDetailsService
         }
 
         String userId = UUID.randomUUID().toString();
+        userInfoDto.setUserId(userId); // ✅ Set in DTO
         userRepository.save(new UserInfo(userId, userInfoDto.getUsername(), userInfoDto.getPassword(), new HashSet<>()));
+
 
         // Try Kafka but don't fail signup if Kafka is down
         try {

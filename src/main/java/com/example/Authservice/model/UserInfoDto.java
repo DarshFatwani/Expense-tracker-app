@@ -1,25 +1,30 @@
 package com.example.Authservice.model;
-import com.example.Authservice.entities.UserInfo;
+
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@JsonNaming (PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 @Builder
-public class UserInfoDto extends UserInfo
-{
+public class UserInfoDto {
 
-    private String firstName; // first_name
+    private String userId;
 
-    private String lastName; //last_name
+    private String username;   // AuthService only
+
+    private String password;   // AuthService only
+
+    private String firstName;
+
+    private String lastName;
 
     private Long phoneNumber;
 
-    private String email; // email
+    private String email;
 
-
+    private String profilePic;
 }
